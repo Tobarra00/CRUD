@@ -1,50 +1,80 @@
 import sqlite3
-from tkinter import messagebox, simpledialog
+import tkinter as tk
+from tkinter import messagebox, simpledialog, filedialog
 
-
-def create_db():
-    '''
-    This function creates a database with the desired name. In case the name already exists,
-    it shows an error and nothing is created.   
+class DbConection():
     
-    '''
-    data_base_name = ""
-    while data_base_name == "":
-        data_base_name = simpledialog.askstring("Camp", "Introduce a database name: \t\t")
-        if data_base_name == "":
-            messagebox.showwarning("Camp", "Name of the database can't be empty.")
+    def __init__(self) -> None:
+        self.db_connection = None
+        self.db_cursor = None
+        self.db_name = ""
     
-    # This if statment is included because pressing "Cancel" or the "X" button of the simpledialog.askstring module returns None.        
-    if data_base_name != None:         
-        db_connexion = sqlite3.connect(f"{data_base_name}.db")
-        db_cursor = db_connexion.cursor()
-        try:
-            db_cursor.execute('''CREATE TABLE CAMPINFO(ID INTEGER PRIMARY KEY AUTOINCREMENT,
-                                                        NAME VARCHAR(20),
-                                                        SURNAME VARCHAR(50), 
-                                                        BIRTH_DATE VARCHAR(10),
-                                                        COMMENTS VARCHAR(200))''')
-            
-            messagebox.showinfo("Camp", "Data base created sucessfully.")
-            
-        except sqlite3.OperationalError:
-            messagebox.showerror("Camp", "Database already exists.")
+    
+    def create_db(self):
+        '''
+        This function creates a database with the desired name. In case the name already exists,
+        it shows an error and nothing is created.   
         
-        db_connexion.close()
-
-
-def open_db():
-    '''
-    This function lets you open an existing database to work with it.
-    '''
+        '''
+        if self.db_connection:
+            self.db_connection.close()
+        self.db_name = ""
+        while self.db_name == "":
+            self.db_name = simpledialog.askstring("Camp", "Introduce a database name: \t\t")
+            if self.db_name == "":
+                messagebox.showwarning("Camp", "Name of the database can't be empty.")
+        
+        # This if statment is included because pressing "Cancel" or the "X" button of the simpledialog.askstring module returns None.        
+        if self.db_name != None:         
+            self.db_connection = sqlite3.connect(f"{self.db_name}.db")
+            self.db_cursor = self.db_connection.cursor()
+            try:
+                self.db_cursor.execute('''CREATE TABLE CAMPINFO(ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                                                            NAME VARCHAR(20),
+                                                            SURNAME VARCHAR(50), 
+                                                            BIRTH_DATE VARCHAR(10),
+                                                            COMMENTS VARCHAR(200))''')
+                
+                messagebox.showinfo("Camp", "Data base created sucessfully.")
+                
+            except sqlite3.OperationalError:
+                messagebox.showerror("Camp", "Database already exists.")
+            
+            
+    def open_db(self):
+        '''
+        This function lets you open an existing database to work with it.
+        '''
+        if self.db_connection:
+            self.db_connection.close()
+        self.db_name = filedialog.askopenfilename(title="Database Search", filetypes=(("", "*.db"),("Any file", "*.*")))
+        self.db_connection = sqlite3.connect(self.db_name)
+        self.db_cursor = self.db_connection.cursor()
+        """ self.db_cursor.execute("INSERT INTO CAMPINFO VALUES (NULL, 'PEDRO', 'GARCIA', '24/08/1998', 'NINGUN COMENTARIO')")
+        self.db_connection.commit()
+        self.db_connection.close() """
+        
+    def exit_app(self, tk_root):
+        '''
+        This function shows a message box letting asking if you are sure about exiting the app
+        '''
+        exit_answer = messagebox.askyesno("Camp", "Are you sure you want to exit the program?")
+        if exit_answer:
+            if self.db_connection:
+                self.db_connection.close()
+            tk_root.quit()
     
-    pass    
+    def exit_x(self):
+        '''
+        This function closes de open database. It is used when the "X" button is pressed.
+        '''
+        if self.db_connection:
+                self.db_connection.close()
     
-def exit_app(tk_root):
-    '''
-    This function shows a message box letting asking if you are sure about exiting the app
-    '''
-    
-    exit_answer = messagebox.askyesno("Camp", "Are you sure you want to exit the program?")
-    if exit_answer:
-        tk_root.quit()
+    def clear_info(self, *args):
+        for fields in args:
+            try:
+                fields.set("")
+            except AttributeError:
+                fields.delete("1.0", tk.END)
+            
