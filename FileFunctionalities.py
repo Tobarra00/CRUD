@@ -50,9 +50,6 @@ class DbConection():
         self.db_name = filedialog.askopenfilename(title="Database Search", filetypes=(("", "*.db"),("Any file", "*.*")))
         self.db_connection = sqlite3.connect(self.db_name)
         self.db_cursor = self.db_connection.cursor()
-        """ self.db_cursor.execute("INSERT INTO CAMPINFO VALUES (NULL, 'PEDRO', 'GARCIA', '24/08/1998', 'NINGUN COMENTARIO')")
-        self.db_connection.commit()
-        self.db_connection.close() """
         
     def exit_app(self, tk_root):
         '''
@@ -77,4 +74,38 @@ class DbConection():
                 fields.set("")
             except AttributeError:
                 fields.delete("1.0", tk.END)
+                
+    def create_entry(self, name, surname, birth_date, comments):
+        '''
+        This function creates a new element and is added to the database.
+        '''
+        self.db_cursor.execute(f"INSERT INTO CAMPINFO (name, surname, birth_date, comments) VALUES (?, ?, ?, ?)", (name.get(), surname.get(), birth_date.get(), comments.get('1.0', tk.END)))
+        self.db_connection.commit()    
+    
+    def read_entry(self, id, name, surname, bith_date, comments):
+        '''
+        This function reads in the database the user assigned to the id you introduce
+        '''
+        self.db_cursor.execute(f"SELECT * FROM CAMPINFO WHERE ID=?", (id.get()))
+        user_searched = self.db_cursor.fetchall()
+        for user_info in user_searched:
+            name.set(user_info[1])
+            surname.set(user_info[2])
+            bith_date.set(user_info[3])
+            comments.delete("1.0", tk.END)
+            comments.insert("1.0", user_info[4])
             
+    def update_entry(self, id, name, surname, birth_date, comments):
+        '''
+        This function allows the user to modify any entry by introducing the id of the user you want to change
+        '''
+        self.db_cursor.execute("UPDATE CAMPINFO SET name=?, surname=?, birth_date=?, comments=? WHERE ID=?", (name.get(), surname.get(), birth_date.get(), comments.get('1.0', tk.END), id.get()))
+        self.db_connection.commit()
+        
+    def delete_entry(self, id):
+        '''
+        This function allows the user to delete any entry based on the given id
+        '''
+        self.db_cursor.execute("DELETE FROM CAMPINFO WHERE ID=?", (id.get()))
+        self.db_connection.commit()
+        

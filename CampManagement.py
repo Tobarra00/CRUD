@@ -14,11 +14,10 @@ root.resizable(False, False)
 connect = FF.DbConection()
 
 # These are the variables that will be send to the DB
-id = IntVar()
+id = StringVar()
 name = StringVar()
 surname = StringVar()
 birth_date = StringVar()
-comments = StringVar()
 
 # Adding a menu to the root
 main_menu = Menu(root)
@@ -31,17 +30,17 @@ data_base_menu.add_separator()
 data_base_menu.add_command(label="Exit", command=lambda:connect.exit_app(root))
 
 clear_data_menu = Menu(main_menu, tearoff=0)
-clear_data_menu.add_command(label="Clear info", command=lambda:connect.clear_info(id, name, surname, birth_date, birth_date, comments_entry))
+clear_data_menu.add_command(label="Clear info", command=lambda:connect.clear_info(id, name, surname, birth_date, comments_entry))
 
 crud_menu = Menu(main_menu, tearoff=0)
-crud_menu.add_command(label="Create")
-crud_menu.add_command(label="Read")
-crud_menu.add_command(label="Update")
-crud_menu.add_command(label="Delete")
+crud_menu.add_command(label="Create", command=lambda:connect.create_entry(name, surname, birth_date, comments_entry))
+crud_menu.add_command(label="Read", command=lambda:connect.read_entry(id, name, surname, birth_date, comments_entry))
+crud_menu.add_command(label="Update", command=lambda:connect.update_entry(id, name, surname, birth_date, comments_entry))
+crud_menu.add_command(label="Delete", command=lambda:connect.delete_entry(id))
 
 info_menu = Menu(main_menu, tearoff=0)
 info_menu.add_command(label="How to use", command=AppInfo.how_to_use)
-info_menu.add_command(label="About", command=AppInfo.about)
+info_menu.add_command(label="About...", command=AppInfo.about)
 
 main_menu.add_cascade(label="File", menu=data_base_menu)
 main_menu.add_cascade(label="Clear data", menu=clear_data_menu)
@@ -81,13 +80,13 @@ comments_entry.config(width=28, height=4)
 
 
 # Adding buttons at the bottom of the interface to performe C.R.U.D.
-create_button = Button(my_frame, text="Create", height=1, width=10)
+create_button = Button(my_frame, text="Create", height=1, width=10, command=lambda:connect.create_entry(name, surname, birth_date, comments_entry))
 create_button.grid(row=6, column=0, padx=5, pady=10)
-read_button = Button(my_frame, text="Read", height=1, width=10)
+read_button = Button(my_frame, text="Read", height=1, width=10, command=lambda:connect.read_entry(id, name, surname, birth_date, comments_entry))
 read_button.grid(row=6, column=1, padx=5, pady=10)
-update_button = Button(my_frame, text="Update", height=1, width=10)
+update_button = Button(my_frame, text="Update", height=1, width=10, command=lambda:connect.update_entry(id, name, surname, birth_date, comments_entry))
 update_button.grid(row=6, column=2, padx=5, pady=10)
-delete_button = Button(my_frame, text="Delete", height=1, width=10)
+delete_button = Button(my_frame, text="Delete", height=1, width=10, command=lambda:connect.delete_entry(id))
 delete_button.grid(row=6, column=3, padx=5, pady=10)
 
 root.bind("<Destroy>", lambda event:connect.exit_x)
