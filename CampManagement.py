@@ -18,6 +18,8 @@ id = StringVar()
 name = StringVar()
 surname = StringVar()
 birth_date = StringVar()
+user_search = StringVar()
+user_found = StringVar()
 
 # Adding a menu to the root
 main_menu = Menu(root)
@@ -30,7 +32,7 @@ data_base_menu.add_separator()
 data_base_menu.add_command(label="Exit", command=lambda:connect.exit_app(root))
 
 clear_data_menu = Menu(main_menu, tearoff=0)
-clear_data_menu.add_command(label="Clear info", command=lambda:connect.clear_info(id, name, surname, birth_date, comments_entry))
+clear_data_menu.add_command(label="Clear info", command=lambda:connect.clear_info(id, name, surname, birth_date, comments_entry, user_found, user_search))
 
 crud_menu = Menu(main_menu, tearoff=0)
 crud_menu.add_command(label="Create", command=lambda:connect.create_entry(name, surname, birth_date, comments_entry))
@@ -63,6 +65,10 @@ birth_date_label = Label(my_frame, text="Birth Date")
 birth_date_label.grid(row=4, column=0, padx=3, pady=4)
 comments_label = Label(my_frame, text="Comments")
 comments_label.grid(row=5, column=0, padx=3, pady=4)
+search_label = Label(my_frame, text="Search user ID: ")
+search_label.grid(row=1, column=4, padx=5, pady=4)
+found_label = Label(my_frame, textvariable=user_found)
+found_label.grid(row=3, column=4, padx=5, pady=4)
 
 
 # Adding text input entries to the fields
@@ -77,6 +83,8 @@ birth_date_entry.grid(row=4, column=1, columnspan=3, padx=3, pady=4)
 comments_entry = scrolledtext.ScrolledText(my_frame)
 comments_entry.grid(row=5, column=1, columnspan=3, padx=3, pady=4)
 comments_entry.config(width=28, height=4)
+search_entry = Entry(my_frame, width=13, textvariable=user_search)
+search_entry.grid(row=2, column=4, columnspan=1, padx=5, pady=4)
 
 
 # Adding buttons at the bottom of the interface to performe C.R.U.D.
@@ -88,6 +96,10 @@ update_button = Button(my_frame, text="Update", height=1, width=10, command=lamb
 update_button.grid(row=6, column=2, padx=5, pady=10)
 delete_button = Button(my_frame, text="Delete", height=1, width=10, command=lambda:connect.delete_entry(id))
 delete_button.grid(row=6, column=3, padx=5, pady=10)
+
+# Adding a search button to get the id of a user by his name
+search_button = Button(my_frame, text="Search", height=1, width=10, command=lambda:connect.search_user(user_search, user_found))
+search_button.grid(row=4, column=4, padx=5, pady=10)
 
 root.bind("<Destroy>", lambda event:connect.exit_x)
 

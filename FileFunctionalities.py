@@ -50,6 +50,8 @@ class DbConection():
         self.db_name = filedialog.askopenfilename(title="Database Search", filetypes=(("", "*.db"),("Any file", "*.*")))
         self.db_connection = sqlite3.connect(self.db_name)
         self.db_cursor = self.db_connection.cursor()
+        if self.db_name:
+            messagebox.showinfo("Camp", "Database opened successfully.")
         
     def exit_app(self, tk_root):
         '''
@@ -79,33 +81,81 @@ class DbConection():
         '''
         This function creates a new element and is added to the database.
         '''
-        self.db_cursor.execute(f"INSERT INTO CAMPINFO (name, surname, birth_date, comments) VALUES (?, ?, ?, ?)", (name.get(), surname.get(), birth_date.get(), comments.get('1.0', tk.END)))
-        self.db_connection.commit()    
-    
+        try:
+            self.db_cursor.execute(f"INSERT INTO CAMPINFO (name, surname, birth_date, comments) VALUES (?, ?, ?, ?)", (name.get().capitalize(), surname.get().capitalize(), birth_date.get(), comments.get('1.0', tk.END)))
+            self.db_connection.commit()    
+            messagebox.showinfo("Camp", "User registered successfully.")
+        except AttributeError:
+            messagebox.showerror("Camp", "There is no database conection. Please create or open a database.")
+        except:
+            messagebox.showerror("Camp", "User could not be created.")
+        
+            
     def read_entry(self, id, name, surname, bith_date, comments):
         '''
         This function reads in the database the user assigned to the id you introduce
         '''
-        self.db_cursor.execute(f"SELECT * FROM CAMPINFO WHERE ID=?", (id.get()))
-        user_searched = self.db_cursor.fetchall()
-        for user_info in user_searched:
-            name.set(user_info[1])
-            surname.set(user_info[2])
-            bith_date.set(user_info[3])
-            comments.delete("1.0", tk.END)
-            comments.insert("1.0", user_info[4])
+        try:
+            self.db_cursor.execute(f"SELECT * FROM CAMPINFO WHERE ID=?", (id.get(),))
+            user_searched = self.db_cursor.fetchall()
+            if user_searched != []:
+                for user_info in user_searched:
+                    name.set(user_info[1])
+                    surname.set(user_info[2])
+                    bith_date.set(user_info[3])
+                    comments.delete("1.0", tk.END)
+                    comments.insert("1.0", user_info[4])
+            else:
+                messagebox.showerror("Camp", "User not found.")
+        except AttributeError:
+            messagebox.showerror("Camp", "There is no database conection. Please create or open a database.")        
             
     def update_entry(self, id, name, surname, birth_date, comments):
         '''
         This function allows the user to modify any entry by introducing the id of the user you want to change
         '''
-        self.db_cursor.execute("UPDATE CAMPINFO SET name=?, surname=?, birth_date=?, comments=? WHERE ID=?", (name.get(), surname.get(), birth_date.get(), comments.get('1.0', tk.END), id.get()))
-        self.db_connection.commit()
-        
+        try:
+            self.db_cursor.execute(f"SELECT * FROM CAMPINFO WHERE ID=?", (id.get(),))
+            user_searched = self.db_cursor.fetchall()
+            if user_searched != []:
+                confirmation = messagebox.askyesno("Camp", "Are you sure you want to update this user data?")
+                if confirmation:
+                    self.db_cursor.execute("UPDATE CAMPINFO SET name=?, surname=?, birth_date=?, comments=? WHERE ID=?", (name.get().capitalize(), surname.get().capitalize(), birth_date.get(), comments.get('1.0', tk.END), id.get()))
+                    self.db_connection.commit()
+                    messagebox.showinfo("Camp", "User info updated successfully.")
+            else:
+                messagebox.showerror("Camp", "User not found. Unable to update info.")
+        except AttributeError:
+            messagebox.showerror("Camp", "There is no database conection. Please create or open a database.")
+            
     def delete_entry(self, id):
         '''
         This function allows the user to delete any entry based on the given id
         '''
-        self.db_cursor.execute("DELETE FROM CAMPINFO WHERE ID=?", (id.get()))
-        self.db_connection.commit()
-        
+        try:
+            self.db_cursor.execute(f"SELECT * FROM CAMPINFO WHERE ID=?", (id.get(),))
+            user_searched = self.db_cursor.fetchall()
+            if user_searched != []:
+                confirmation = messagebox.askyesno("Camp", "Are you sure you want to delete this user data?")
+                if confirmation:
+                    self.db_cursor.execute("DELETE FROM CAMPINFO WHERE ID=?", (id.get()))
+                    self.db_connection.commit()
+                    messagebox.showinfo("Camp", "User deleted successfully.")
+            else:
+                messagebox.showerror("Camp", "User not found. Unable to delete.")
+        except AttributeError:
+            messagebox.showerror("Camp", "There is no database conection. Please create or open a database.")
+            
+    def search_user(self, name, result):
+        '''
+        This function allows the user to introduce a name and the program will show you the id of that name
+        '''
+        try:
+            self.db_cursor.execute(f"SELECT ID FROM CAMPINFO WHERE NAME=?", (name.get().capitalize(),))
+            user_searched = self.db_cursor.fetchall()
+            if user_searched != []:
+                result.set(user_searched)
+            else:
+                result.set("User not found.")
+        except AttributeError:
+            messagebox.showerror("Camp", "There is no database conection. Please create or open a database.")
